@@ -1,13 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardFooter, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@/components/ui/carousel';
 
 // Define the structure of a Medium post from the rss2json API
 interface MediumPost {
@@ -17,31 +10,29 @@ interface MediumPost {
   guid: string;
   author: string;
   thumbnail: string;
-  description:string;
+  description: string;
   content: string;
-  enclosure: {
-    link: string;
-    type: string;
-    length: number;
-  };
+  enclosure: any;
   categories: string[];
-  posterImage: string; // Custom field for the extracted poster image
+  posterImage?: string;
 }
 
-// Function to strip HTML and truncate text
-const cleanAndTruncate = (html: string, length: number = 80): string => {
-  // First, remove the image tag to avoid its alt text appearing.
-  const textWithoutImage = html.replace(/<img[^>]*>/g, "");
-  // Then, strip all other HTML tags.
-  const text = textWithoutImage.replace(/<[^>]*>/g, '');
-  if (text.length <= length) {
-    return text;
-  }
-  return text.substring(0, length) + '...';
+// Utility function to clean and truncate the description
+const cleanAndTruncate = (text: string, maxLength: number = 100) => {
+  // Remove HTML tags and decode entities
+  const cleanText = text
+    .replace(/<[^>]*>/g, '')
+    .replace(/&[^;]+;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  return cleanText.length > maxLength 
+    ? cleanText.substring(0, maxLength) + '...'
+    : cleanText;
 };
 
-// Function to format date
-const formatDate = (dateString: string): string => {
+// Format date function
+const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -100,31 +91,23 @@ const Medium = () => {
   return (
     <section id="medium" className="py-20 md:py-32 bg-secondary">
       <div className="container">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            From My Blog
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-primary/10 border border-primary/20 rounded-full">
+            <span className="text-sm font-medium text-primary">Latest Posts</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            From My <span className="gradient-text">Medium</span>
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Insights, tutorials, and stories from my journey in tech.
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Insights, tutorials, and thoughts on cybersecurity and technology.
           </p>
         </div>
 
-        <div className="relative mt-12">
+        <div className="max-w-6xl mx-auto">
           {loading && (
-            <div className="flex overflow-hidden">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="min-w-0 shrink-0 grow-0 basis-full p-4 md:basis-1/2 lg:basis-1/3">
-                  <Card className="animate-pulse">
-                    <div className="aspect-video w-full bg-muted"></div>
-                    <div className="p-4">
-                      <div className="h-4 w-1/2 rounded bg-muted"></div>
-                      <div className="mt-3 h-5 w-3/4 rounded bg-muted"></div>
-                      <div className="mt-3 h-4 w-full rounded bg-muted"></div>
-                      <div className="mt-2 h-4 w-5/6 rounded bg-muted"></div>
-                    </div>
-                  </Card>
-                </div>
-              ))}
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
           )}
 
@@ -135,57 +118,92 @@ const Medium = () => {
           )}
 
           {!loading && !error && posts.length > 0 && (
-            <Carousel
-              opts={{
-                align: 'start',
-                loop: posts.length > 3,
-              }}
-              className="w-full"
-            >
-              <CarouselContent className="-ml-4">
-                {posts.slice(0, 6).map((post) => (
-                  <CarouselItem key={post.guid} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                    <div className="h-full p-1">
-                      <a
-                        href={post.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group block h-full"
-                      >
-                        <Card className="flex h-full flex-col overflow-hidden transition-all group-hover:shadow-xl group-hover:-translate-y-1">
-                          <div className="aspect-video overflow-hidden">
-                            <img
-                              src={post.posterImage}
-                              alt={post.title}
-                              className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                            />
-                          </div>
-                          <div className="flex flex-grow flex-col p-4">
-                            <p className="text-xs text-muted-foreground">
-                              {formatDate(post.pubDate)}
-                            </p>
-                            <CardTitle className="mt-2 text-base font-bold leading-snug">
-                              {post.title}
-                            </CardTitle>
-                            <p className="mt-2 flex-grow text-sm text-card-foreground/80">
-                              {cleanAndTruncate(post.description)}
-                            </p>
-                            <CardFooter className="mt-3 flex flex-wrap gap-2 p-0">
-                              {post.categories.slice(0, 3).map((tag) => (
-                                <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
-                              ))}
-                            </CardFooter>
-                          </div>
-                        </Card>
-                      </a>
-                    </div>
-                  </CarouselItem>
+            <div className="relative">
+              {/* Horizontal scroll container */}
+              <div className="flex overflow-x-auto scrollbar-thin pb-4 gap-6 snap-x snap-mandatory">
+                {posts.map((post) => (
+                  <a
+                    key={post.guid}
+                    href={post.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block flex-shrink-0 snap-start"
+                    style={{ width: '320px' }}
+                  >
+                    <Card className="flex h-full flex-col overflow-hidden transition-all group-hover:shadow-xl group-hover:-translate-y-1 w-full">
+                      <div className="aspect-video overflow-hidden">
+                        <img
+                          src={post.posterImage}
+                          alt={post.title}
+                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=500&q=80';
+                          }}
+                        />
+                      </div>
+                      <div className="flex flex-grow flex-col p-4">
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(post.pubDate)}
+                        </p>
+                        <CardTitle className="mt-2 text-base font-bold leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                          {post.title}
+                        </CardTitle>
+                        <p className="mt-2 flex-grow text-sm text-card-foreground/80 line-clamp-3">
+                          {cleanAndTruncate(post.description, 150)}
+                        </p>
+                        <CardFooter className="mt-3 flex flex-wrap gap-2 p-0">
+                          {post.categories.slice(0, 2).map((tag) => (
+                            <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                          ))}
+                        </CardFooter>
+                      </div>
+                    </Card>
+                  </a>
                 ))}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
+                
+                {/* Show loading indicator if there are more posts available */}
+                {posts.length > 0 && (
+                  <div className="flex-shrink-0 flex items-center justify-center w-32">
+                    <div className="text-center text-muted-foreground">
+                      <p className="text-sm">Scroll for more →</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Scroll indicators */}
+              <div className="flex justify-center mt-4 space-x-2">
+                {posts.length > 3 && (
+                  <div className="text-xs text-muted-foreground">
+                    {posts.length} articles • Scroll horizontally to view all
+                  </div>
+                )}
+              </div>
+            </div>
           )}
+
+          {!loading && !error && posts.length === 0 && (
+            <div className="text-center text-muted-foreground py-20">
+              <p>No Medium posts found.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Call to action */}
+        <div className="text-center mt-16">
+          <p className="text-muted-foreground mb-4">Want to read more of my articles?</p>
+          <a
+            href={`https://medium.com/${mediumUsername}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
+          >
+            Visit My Medium
+            <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
         </div>
       </div>
     </section>
