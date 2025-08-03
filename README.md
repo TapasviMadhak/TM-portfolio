@@ -111,9 +111,9 @@ src/
 
 ## 🔗 Links
 
-- **Live Website**: [Your deployed URL here]
+- **Live Website**: [https://tapasvi-madhak.surge.sh](https://tapasvi-madhak.surge.sh)
 - **GitHub**: [https://github.com/TapasviMadhak](https://github.com/TapasviMadhak)
-- **LinkedIn**: [Your LinkedIn profile]
+- **LinkedIn**: [https://www.linkedin.com/in/tapasvi-madhak-159945248/](https://www.linkedin.com/in/tapasvi-madhak-159945248/)
 
 ## 📄 License
 
