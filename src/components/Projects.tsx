@@ -1,9 +1,17 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FaGithub, FaGamepad, FaShieldAlt } from 'react-icons/fa';
+import { FaGithub, FaGamepad, FaShieldAlt, FaUser } from 'react-icons/fa';
 
 const projects = [
+  {
+    title: 'Personal Portfolio Website',
+    description: 'A modern, responsive portfolio website showcasing my cybersecurity expertise and projects. Built with React, TypeScript, and Tailwind CSS, featuring custom animations, dark mode, and a sleek design.',
+    icon: FaUser,
+    color: 'from-green-500 to-teal-600',
+    tags: ['React', 'TypeScript', 'Tailwind CSS', 'Vite', 'Responsive Design'],
+    repoUrl: 'https://github.com/TapasviMadhak/TM-portfolio',
+  },
   {
     title: 'Skribbl.io Clone',
     description: 'A real-time, multiplayer drawing and guessing game that allows users to join rooms, draw words, and compete with friends. Built to replicate the fun and interactive experience of the original Skribbl.io.',
